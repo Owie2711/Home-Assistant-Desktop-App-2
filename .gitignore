@@ -19,3 +19,6 @@ installer/.wix/
 installer/uitmp/
 installer/uitmp406/
 installer/utiltmp/
+
+# WiX extensions
+installer/.wix/
