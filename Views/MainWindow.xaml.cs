@@ -19,7 +19,8 @@ public partial class MainWindow : Window
         App.Window.Attach(this);
         App.Window.ApplySavedState();
 
-        var iconPath = Path.Combine(AppContext.BaseDirectory, "app.ico");
+        var iconPath = Path.Combine(AppContext.BaseDirectory, "Home Assistant.ico");
+        if (!File.Exists(iconPath)) iconPath = Path.Combine(AppContext.BaseDirectory, "app.ico");
         if (File.Exists(iconPath)) Icon = new System.Windows.Media.Imaging.BitmapImage(new System.Uri(iconPath));
 
         App.Tray.OpenRequested += () => ShowAndActivate();
@@ -27,6 +28,26 @@ public partial class MainWindow : Window
         App.Tray.ExitRequested += () => System.Windows.Application.Current.Shutdown();
         _vm.SettingsRequested += ShowSettings;
         SizeChanged += MainWindow_SizeChanged;
+        StateChanged += MainWindow_StateChanged;
+        IsVisibleChanged += MainWindow_IsVisibleChanged;
+    }
+
+    private void MainWindow_StateChanged(object? sender, EventArgs e)
+    {
+        if (!App.Settings.Settings.AlwaysOnTop) return;
+        if (WindowState == WindowState.Minimized)
+        {
+            App.Window.RestoreFromMinimize();
+        }
+    }
+
+    private void MainWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (!App.Settings.Settings.AlwaysOnTop) return;
+        if (!IsVisible)
+        {
+            App.Window.RestoreVisibility();
+        }
     }
 
     private System.Windows.Threading.DispatcherTimer? _saveTimer;
@@ -35,8 +56,15 @@ public partial class MainWindow : Window
         if (WindowState == WindowState.Minimized) return;
         _saveTimer ??= new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(800) };
         _saveTimer.Stop();
-        _saveTimer.Tick += (_, _) => { _saveTimer.Stop(); App.Window.SaveState(); };
+        _saveTimer.Tick -= OnSaveTimerTick;
+        _saveTimer.Tick += OnSaveTimerTick;
         _saveTimer.Start();
+    }
+
+    private void OnSaveTimerTick(object? sender, EventArgs e)
+    {
+        _saveTimer?.Stop();
+        App.Window.SaveState();
     }
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -49,8 +77,8 @@ public partial class MainWindow : Window
         if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
         Show();
         Activate();
-        Topmost = false;
-        Topmost = App.Settings.Settings.AlwaysOnTop;
+        if (App.Settings.Settings.AlwaysOnTop)
+            App.Window.SetAlwaysOnTop(true);
     }
 
     private async void ShowSettings()

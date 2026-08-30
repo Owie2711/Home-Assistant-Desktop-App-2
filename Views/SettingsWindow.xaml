@@ -43,112 +43,167 @@
             <Setter Property="Background" Value="#03a9f4"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="MinWidth" Value="72"/>
+            <Setter Property="Height" Value="32"/>
         </Style>
         <Style TargetType="TextBox">
             <Setter Property="Background" Value="#2a2a32"/>
             <Setter Property="Foreground" Value="#e8e8ea"/>
             <Setter Property="BorderBrush" Value="#3a3a42"/>
-            <Setter Property="Padding" Value="6"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Height" Value="34"/>
+        </Style>
+
+        <!-- Consistent setting row: label left, control right -->
+        <Style x:Key="SettingRow" TargetType="Grid">
+            <Setter Property="Margin" Value="0,6"/>
+        </Style>
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="#03a9f4"/>
+            <Setter Property="Margin" Value="0,18,0,6"/>
+        </Style>
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#9a9aa2"/>
+            <Setter Property="Margin" Value="0,8,0,3"/>
+        </Style>
+        <Style x:Key="GhostButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#e8e8ea"/>
+            <Setter Property="BorderBrush" Value="#3a3a42"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="MinWidth" Value="64"/>
+        </Style>
+        <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="#b3261e"/>
         </Style>
     </Window.Resources>
 
-    <Grid Margin="16">
+    <Grid Margin="22,18">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="0,0,6,0">
             <StackPanel>
-                <TextBlock Text="Startup" FontWeight="Bold" FontSize="15" Margin="0,0,0,8" Foreground="#03a9f4"/>
-                <DockPanel Margin="0,4">
+
+                <TextBlock Text="Startup" Style="{StaticResource SectionHeader}"/>
+                <Grid Style="{StaticResource SettingRow}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
                     <TextBlock Text="Start with Windows" VerticalAlignment="Center"/>
-                    <ToggleButton DockPanel.Dock="Right" Style="{StaticResource SwitchToggle}" IsChecked="{Binding StartWithWindows}"/>
-                </DockPanel>
-                <DockPanel Margin="0,4">
+                    <ToggleButton Grid.Column="1" Style="{StaticResource SwitchToggle}" IsChecked="{Binding StartWithWindows}"/>
+                </Grid>
+                <Grid Style="{StaticResource SettingRow}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
                     <TextBlock Text="Start minimized" VerticalAlignment="Center"/>
-                    <ToggleButton DockPanel.Dock="Right" Style="{StaticResource SwitchToggle}" IsChecked="{Binding StartMinimized}"/>
-                </DockPanel>
+                    <ToggleButton Grid.Column="1" Style="{StaticResource SwitchToggle}" IsChecked="{Binding StartMinimized}"/>
+                </Grid>
 
-                <TextBlock Text="Window" FontWeight="Bold" FontSize="15" Margin="0,16,0,8" Foreground="#03a9f4"/>
-                <DockPanel Margin="0,4">
+                <TextBlock Text="Window" Style="{StaticResource SectionHeader}"/>
+                <Grid Style="{StaticResource SettingRow}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
                     <TextBlock Text="Always on top" VerticalAlignment="Center"/>
-                    <ToggleButton DockPanel.Dock="Right" Style="{StaticResource SwitchToggle}" IsChecked="{Binding AlwaysOnTop}"/>
-                </DockPanel>
-                <DockPanel Margin="0,4">
+                    <ToggleButton Grid.Column="1" Style="{StaticResource SwitchToggle}" IsChecked="{Binding AlwaysOnTop}"/>
+                </Grid>
+                <Grid Style="{StaticResource SettingRow}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
                     <TextBlock Text="Minimize on close" VerticalAlignment="Center"/>
-                    <ToggleButton DockPanel.Dock="Right" Style="{StaticResource SwitchToggle}" IsChecked="{Binding MinimizeOnClose}"/>
-                </DockPanel>
-                <DockPanel Margin="0,4">
+                    <ToggleButton Grid.Column="1" Style="{StaticResource SwitchToggle}" IsChecked="{Binding MinimizeOnClose}"/>
+                </Grid>
+                <Grid Style="{StaticResource SettingRow}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
                     <TextBlock Text="Fullscreen on launch" VerticalAlignment="Center"/>
-                    <ToggleButton DockPanel.Dock="Right" Style="{StaticResource SwitchToggle}" IsChecked="{Binding Fullscreen}"/>
-                </DockPanel>
+                    <ToggleButton Grid.Column="1" Style="{StaticResource SwitchToggle}" IsChecked="{Binding Fullscreen}"/>
+                </Grid>
 
-                <TextBlock Text="Home Assistant Servers" FontWeight="Bold" FontSize="15" Margin="0,16,0,8" Foreground="#03a9f4"/>
-                <ListBox ItemsSource="{Binding Servers}" Background="#2a2a32" BorderBrush="#3a3a42" MaxHeight="200">
+                <TextBlock Text="Home Assistant Servers" Style="{StaticResource SectionHeader}"/>
+                <ListBox ItemsSource="{Binding Servers}" Background="#2a2a32" BorderBrush="#3a3a42"
+                         BorderThickness="1" MaxHeight="220">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Grid Margin="4">
+                            <Grid Margin="6">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
                                     <TextBlock Text="{Binding Url}" Margin="0,2,0,0" Foreground="#9a9aa2" FontSize="11"/>
                                 </StackPanel>
-                                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                    <Button Content="Edit" Background="Transparent" Foreground="#e8e8ea" BorderBrush="#3a3a42"
+                                <WrapPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"
+                                           ItemWidth="Auto" MaxWidth="240">
+                                    <Button Content="Edit" Style="{StaticResource GhostButton}" Margin="2"
                                             Command="{Binding DataContext.EditServerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                            CommandParameter="{Binding}" Margin="2"/>
-                                    <Button Content="Test" Background="Transparent" Foreground="#e8e8ea" BorderBrush="#3a3a42"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Content="Test" Style="{StaticResource GhostButton}" Margin="2"
                                             Command="{Binding DataContext.TestConnectionCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                            CommandParameter="{Binding}" Margin="2"/>
-                                    <Button Content="Default" Background="Transparent" Foreground="#e8e8ea" BorderBrush="#3a3a42"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Content="Default" Style="{StaticResource GhostButton}" Margin="2"
                                             Command="{Binding DataContext.SetDefaultCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                            CommandParameter="{Binding}" Margin="2"/>
-                                    <Button Content="Delete" Background="#b3261e" Foreground="White"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Content="Delete" Style="{StaticResource DangerButton}" Margin="2"
                                             Command="{Binding DataContext.DeleteServerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                            CommandParameter="{Binding}" Margin="2"/>
-                                </StackPanel>
+                                            CommandParameter="{Binding}"/>
+                                </WrapPanel>
                             </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
 
-                <Button Content="Add Server" HorizontalAlignment="Left" Margin="0,8,0,0"
-                        Command="{Binding AddServerCommand}" Background="Transparent" Foreground="#e8e8ea" BorderBrush="#3a3a42"/>
+                <Button Content="Add Server" HorizontalAlignment="Left" Margin="0,10,0,0"
+                        Style="{StaticResource GhostButton}" Command="{Binding AddServerCommand}"/>
 
                 <!-- Edit panel -->
-                <Border Background="#23232a" BorderBrush="#3a3a42" BorderThickness="1" Padding="12" Margin="0,12,0,0"
+                <Border Background="#23232a" BorderBrush="#3a3a42" BorderThickness="1" Padding="14" Margin="0,14,0,0"
                         Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}">
                     <StackPanel>
-                        <TextBlock Text="Server details" FontWeight="Bold" Margin="0,0,0,8"/>
-                        <TextBlock Text="Name" Foreground="#9a9aa2"/>
-                        <TextBox Text="{Binding EditName}" Margin="0,2,0,8"/>
-                        <TextBlock Text="URL" Foreground="#9a9aa2"/>
-                        <TextBox Text="{Binding EditUrl}" Margin="0,2,0,8"/>
-                        <DockPanel>
+                        <TextBlock Text="Server details" FontWeight="Bold" FontSize="14" Margin="0,0,0,8"/>
+                        <TextBlock Text="Name" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Text="{Binding EditName}"/>
+                        <TextBlock Text="URL" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Text="{Binding EditUrl}"/>
+                        <Grid Style="{StaticResource SettingRow}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
                             <TextBlock Text="Set as default" VerticalAlignment="Center"/>
-                            <ToggleButton DockPanel.Dock="Right" Style="{StaticResource SwitchToggle}" IsChecked="{Binding EditIsDefault}"/>
-                        </DockPanel>
-                        <TextBlock Text="{Binding TestStatus}" Foreground="#9a9aa2" FontSize="11" Margin="0,8,0,0"
+                            <ToggleButton Grid.Column="1" Style="{StaticResource SwitchToggle}" IsChecked="{Binding EditIsDefault}"/>
+                        </Grid>
+                        <TextBlock Text="{Binding TestStatus}" Foreground="#9a9aa2" FontSize="11" Margin="0,6,0,0"
                                    Visibility="{Binding HasTestStatus, Converter={StaticResource BoolToVis}}"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                            <Button Content="Save" Command="{Binding SaveServerCommand}" Margin="0,0,6,0"/>
-                            <Button Content="Test" Command="{Binding TestConnectionEditCommand}" Background="Transparent" Foreground="#e8e8ea" BorderBrush="#3a3a42" Margin="0,0,6,0"/>
-                            <Button Content="Cancel" Command="{Binding CancelEditCommand}" Background="Transparent" Foreground="#e8e8ea" BorderBrush="#3a3a42"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                            <Button Content="Save" Command="{Binding SaveServerCommand}" Margin="0,0,8,0"/>
+                            <Button Content="Test" Style="{StaticResource GhostButton}" Command="{Binding TestConnectionEditCommand}" Margin="0,0,8,0"/>
+                            <Button Content="Cancel" Style="{StaticResource GhostButton}" Command="{Binding CancelEditCommand}"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
 
                 <TextBlock Text="Appearance is managed by Home Assistant itself. The desktop client does not override Home Assistant themes."
-                           TextWrapping="Wrap" Foreground="#9a9aa2" FontSize="11" Margin="0,16,0,0"/>
+                           TextWrapping="Wrap" Foreground="#9a9aa2" FontSize="11" Margin="0,18,0,0"/>
             </StackPanel>
         </ScrollViewer>
 
-        <Button Grid.Row="1" Content="Close" Width="100" HorizontalAlignment="Right" Margin="0,12,0,0"
-                Command="{Binding CloseCommand}" Background="Transparent" Foreground="#e8e8ea" BorderBrush="#3a3a42"/>
+        <Button Grid.Row="1" Content="Close" Width="100" HorizontalAlignment="Right" Margin="0,14,0,0"
+                Style="{StaticResource GhostButton}" Command="{Binding CloseCommand}"/>
     </Grid>
 </Window>

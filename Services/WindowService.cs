@@ -15,6 +15,7 @@ public sealed class WindowService
     private readonly SettingsService _settings;
     private readonly ILogger _log;
     private Window? _window;
+    private IntPtr _hwnd;
 
     public WindowService(SettingsService settings, ILogger log)
     {
@@ -22,12 +23,83 @@ public sealed class WindowService
         _log = log;
     }
 
+    private const int WM_SYSCOMMAND = 0x0112;
+    private const int SC_MINIMIZE = 0xF020;
+    private const int WM_WINDOWPOSCHANGING = 0x0046;
+    private const int WM_SHOWWINDOW = 0x0018;
+    private const int WM_WINDOWPOSCHANGED = 0x0047;
+    private const int WM_ACTIVATE = 0x0006;
+    private const int WM_ACTIVATEAPP = 0x001C;
+    private const uint SWP_HIDEWINDOW = 0x0080;
+    private volatile int _applyingTopMost;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct WINDOWPOS
+    {
+        public IntPtr hwnd;
+        public IntPtr hwndInsertAfter;
+        public int x;
+        public int y;
+        public int cx;
+        public int cy;
+        public uint flags;
+    }
+
     public void Attach(Window window)
     {
         _window = window;
         var s = _settings.Settings;
         window.Topmost = s.AlwaysOnTop;
-        if (s.AlwaysOnTop) SetBrutalTopMost(true);
+        window.SourceInitialized += (_, _) =>
+        {
+            _hwnd = new WindowInteropHelper(window).Handle;
+            var source = HwndSource.FromHwnd(_hwnd);
+            source?.AddHook(WndProc);
+            if (s.AlwaysOnTop) SetBrutalTopMost(true);
+        };
+    }
+
+    private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (!_settings.Settings.AlwaysOnTop) return IntPtr.Zero;
+
+        switch (msg)
+        {
+            case WM_SYSCOMMAND:
+                if ((wParam.ToInt32() & 0xFFF0) == SC_MINIMIZE)
+                    handled = true;
+                break;
+
+            case WM_SHOWWINDOW:
+                if (wParam == IntPtr.Zero)
+                    handled = true;
+                break;
+
+            case WM_WINDOWPOSCHANGING:
+                if (lParam != IntPtr.Zero)
+                {
+                    var pos = Marshal.PtrToStructure<WINDOWPOS>(lParam);
+                    pos.hwndInsertAfter = HWND_TOPMOST;
+                    pos.flags &= ~SWP_HIDEWINDOW;
+                    Marshal.StructureToPtr(pos, lParam, false);
+                }
+                break;
+
+            case WM_WINDOWPOSCHANGED:
+            case WM_ACTIVATE:
+            case WM_ACTIVATEAPP:
+                // Re-apply topmost after focus changes or window moves
+                if (Interlocked.CompareExchange(ref _applyingTopMost, 1, 0) == 0)
+                {
+                    System.Windows.Application.Current?.Dispatcher?.BeginInvoke(() =>
+                    {
+                        SetBrutalTopMost(true);
+                        Interlocked.Exchange(ref _applyingTopMost, 0);
+                    }, System.Windows.Threading.DispatcherPriority.Background);
+                }
+                break;
+        }
+        return IntPtr.Zero;
     }
 
     [DllImport("user32.dll", EntryPoint = "GetWindowLongPtr")]
@@ -49,17 +121,19 @@ public sealed class WindowService
 
     private void SetBrutalTopMost(bool enable)
     {
-        if (_window is null) return;
-        var hwnd = new WindowInteropHelper(_window).Handle;
-        if (hwnd == IntPtr.Zero) return;
-        var style = (uint)GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+        if (_hwnd == IntPtr.Zero)
+        {
+            if (_window is not null) _hwnd = new WindowInteropHelper(_window).Handle;
+        }
+        if (_hwnd == IntPtr.Zero) return;
+        var style = (uint)GetWindowLongPtr(_hwnd, GWL_EXSTYLE);
         if (enable)
             style |= WS_EX_TOPMOST | WS_EX_TOOLWINDOW;
         else
             style &= ~(WS_EX_TOPMOST | WS_EX_TOOLWINDOW);
-        SetWindowLongPtr(hwnd, GWL_EXSTYLE, (IntPtr)style);
+        SetWindowLongPtr(_hwnd, GWL_EXSTYLE, (IntPtr)style);
         if (enable)
-            SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+            SetWindowPos(_hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
     }
 
     public void ApplySavedState()
@@ -113,6 +187,22 @@ public sealed class WindowService
         if (_window is null) return;
         _window.Topmost = value;
         SetBrutalTopMost(value);
+    }
+
+    public void RestoreFromMinimize()
+    {
+        if (_window is null) return;
+        var s = _settings.Settings;
+        _window.WindowState = s.WindowMaximized ? WindowState.Maximized : WindowState.Normal;
+        SetBrutalTopMost(true);
+    }
+
+    public void RestoreVisibility()
+    {
+        if (_window is null) return;
+        if (_window.Visibility != Visibility.Visible)
+            _window.Visibility = Visibility.Visible;
+        SetBrutalTopMost(true);
     }
 
     public void ToggleFullscreen()

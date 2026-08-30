@@ -13,11 +13,12 @@
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>false</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <ApplicationIcon>Home Assistant.ico</ApplicationIcon>
     <NoWarn>WFO0003</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="app.ico">
+    <None Update="Home Assistant.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3296.44" />

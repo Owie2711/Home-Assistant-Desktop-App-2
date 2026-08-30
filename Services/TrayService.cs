@@ -21,7 +21,8 @@ public sealed class TrayService : IDisposable
     {
         _settings = settings;
         _log = log;
-        var iconPath = Path.Combine(AppContext.BaseDirectory, "app.ico");
+        var iconPath = Path.Combine(AppContext.BaseDirectory, "Home Assistant.ico");
+        if (!File.Exists(iconPath)) iconPath = Path.Combine(AppContext.BaseDirectory, "app.ico");
         _notify = new NotifyIcon
         {
             Text = "Home Assistant Desktop",

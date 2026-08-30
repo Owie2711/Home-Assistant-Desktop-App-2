@@ -78,15 +78,13 @@ public sealed partial class MainViewModel : ObservableObject
 
     public async Task SwitchServerAsync(string id)
     {
-        ActiveServerName = _servers.GetActive()?.Name ?? "";
-        // refresh label after switch
-        var s = _settings.Settings.Servers.FirstOrDefault(x => x.Id == id);
-        if (s is not null) ActiveServerName = s.Name;
         try
         {
             ShowError = false;
             await _webView.SwitchServerAsync(id);
             _currentServerId = id;
+            var s = _settings.Settings.Servers.FirstOrDefault(x => x.Id == id);
+            ActiveServerName = s?.Name ?? _servers.GetActive()?.Name ?? "";
             _tray.RebuildServerMenu();
         }
         catch (Exception ex)
@@ -111,11 +109,11 @@ public sealed partial class MainViewModel : ObservableObject
     {
         _tray.RebuildServerMenu();
         var server = _servers.GetActive();
-        if (server is not null)
+        if (server is not null && server.Id != _currentServerId)
         {
             ActiveServerName = server.Name;
-            if (server.Id != _currentServerId)
-                await _webView.SwitchServerAsync(server.Id);
+            await _webView.SwitchServerAsync(server.Id);
+            _currentServerId = server.Id;
         }
     }
 }

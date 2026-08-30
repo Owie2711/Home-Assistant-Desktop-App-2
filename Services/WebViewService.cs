@@ -24,6 +24,8 @@ public sealed class WebViewService
     private CoreWebView2Environment? _environment;
     private readonly Dictionary<string, CoreWebView2Environment> _envCache = [];
     private CancellationTokenSource? _connCts;
+    private static readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(8) };
+    private bool _disposed;
 
     public ConnectionState State { get; private set; } = ConnectionState.Unknown;
     public event Action<ConnectionState>? ConnectionStateChanged;
@@ -51,8 +53,12 @@ public sealed class WebViewService
         {
             var userData = _servers.ProfileDirectoryFor(server);
             Directory.CreateDirectory(userData);
-            _environment = await CoreWebView2Environment.CreateAsync(
-                userDataFolder: userData);
+            if (!_envCache.TryGetValue(server.Id, out var env))
+            {
+                env = await CoreWebView2Environment.CreateAsync(userDataFolder: userData);
+                _envCache[server.Id] = env;
+            }
+            _environment = env;
             await _webView.EnsureCoreWebView2Async(_environment);
             _log.LogInformation("WebView2 initialized for server {Name} ({Url})", server.Name, server.Url);
 
@@ -79,7 +85,7 @@ public sealed class WebViewService
         if (server is null || _webView?.CoreWebView2 is null) return;
         _log.LogInformation("Navigating to {Name} ({Url})", server.Name, server.Url);
         SetState(ConnectionState.Connecting);
-        await Task.Run(() => _webView.Dispatcher.Invoke(() => _webView.CoreWebView2.Navigate(server.Url)));
+        await _webView.Dispatcher.InvokeAsync(() => _webView.CoreWebView2.Navigate(server.Url));
     }
 
     public void NavigateBack() => _webView?.CoreWebView2?.GoBack();
@@ -172,10 +178,9 @@ public sealed class WebViewService
         if (server is null) return;
         try
         {
-            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(8) };
             var uri = new Uri(server.Url);
             var baseUri = $"{uri.Scheme}://{uri.Host}:{uri.Port}";
-            var resp = await client.GetAsync(baseUri, token);
+            var resp = await _httpClient.GetAsync(baseUri, token);
             if (!token.IsCancellationRequested)
                 SetState(resp.IsSuccessStatusCode || resp.StatusCode == System.Net.HttpStatusCode.Unauthorized
                     ? ConnectionState.Connected
@@ -194,5 +199,15 @@ public sealed class WebViewService
         if (State == state) return;
         State = state;
         ConnectionStateChanged?.Invoke(state);
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        _connCts?.Cancel();
+        _connCts?.Dispose();
+        _envCache.Clear();
+        _webView?.Dispose();
     }
 }
