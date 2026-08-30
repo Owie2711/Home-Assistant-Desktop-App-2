@@ -30,7 +30,10 @@ public sealed class WindowService
     private const int WM_WINDOWPOSCHANGED = 0x0047;
     private const int WM_ACTIVATE = 0x0006;
     private const int WM_ACTIVATEAPP = 0x001C;
+    private const int WM_SIZE = 0x0005;
+    private const int SIZE_MAXIMIZED = 2;
     private const uint SWP_HIDEWINDOW = 0x0080;
+    private const uint SWP_NOZORDER = 0x0004;
     private volatile int _applyingTopMost;
 
     [StructLayout(LayoutKind.Sequential)]
@@ -74,28 +77,36 @@ public sealed class WindowService
                 if (wParam == IntPtr.Zero)
                     handled = true;
                 break;
+            case WM_SIZE:
+                if (wParam.ToInt32() == SIZE_MAXIMIZED && Interlocked.CompareExchange(ref _applyingTopMost, 1, 0) == 0)
+                {
+                    SetBrutalTopMost(true);
+                    Interlocked.Exchange(ref _applyingTopMost, 0);
+                }
+                break;
 
             case WM_WINDOWPOSCHANGING:
                 if (lParam != IntPtr.Zero)
                 {
                     var pos = Marshal.PtrToStructure<WINDOWPOS>(lParam);
                     pos.hwndInsertAfter = HWND_TOPMOST;
-                    pos.flags &= ~SWP_HIDEWINDOW;
+                    pos.flags &= ~(SWP_HIDEWINDOW | SWP_NOZORDER);
                     Marshal.StructureToPtr(pos, lParam, false);
+                }
+                if (Interlocked.CompareExchange(ref _applyingTopMost, 1, 0) == 0)
+                {
+                    SetBrutalTopMost(true);
+                    Interlocked.Exchange(ref _applyingTopMost, 0);
                 }
                 break;
 
             case WM_WINDOWPOSCHANGED:
             case WM_ACTIVATE:
             case WM_ACTIVATEAPP:
-                // Re-apply topmost after focus changes or window moves
                 if (Interlocked.CompareExchange(ref _applyingTopMost, 1, 0) == 0)
                 {
-                    System.Windows.Application.Current?.Dispatcher?.BeginInvoke(() =>
-                    {
-                        SetBrutalTopMost(true);
-                        Interlocked.Exchange(ref _applyingTopMost, 0);
-                    }, System.Windows.Threading.DispatcherPriority.Background);
+                    SetBrutalTopMost(true);
+                    Interlocked.Exchange(ref _applyingTopMost, 0);
                 }
                 break;
         }
@@ -160,26 +171,39 @@ public sealed class WindowService
     {
         if (_window is null) return;
         var s = _settings.Settings;
+        bool changed = false;
         if (_window.WindowState == WindowState.Maximized)
         {
-            s.WindowMaximized = true;
-            // use RestoreBounds for real position/size
             var rb = _window.RestoreBounds;
-            s.WindowLeft = rb.Left;
-            s.WindowTop = rb.Top;
-            s.WindowWidth = rb.Width;
-            s.WindowHeight = rb.Height;
+            if (s.WindowMaximized != true || s.WindowLeft != rb.Left || s.WindowTop != rb.Top ||
+                s.WindowWidth != rb.Width || s.WindowHeight != rb.Height)
+            {
+                s.WindowMaximized = true;
+                s.WindowLeft = rb.Left;
+                s.WindowTop = rb.Top;
+                s.WindowWidth = rb.Width;
+                s.WindowHeight = rb.Height;
+                changed = true;
+            }
         }
         else
         {
-            s.WindowMaximized = false;
-            s.WindowLeft = _window.Left;
-            s.WindowTop = _window.Top;
-            s.WindowWidth = _window.Width;
-            s.WindowHeight = _window.Height;
+            if (s.WindowMaximized != false || s.WindowLeft != _window.Left || s.WindowTop != _window.Top ||
+                s.WindowWidth != _window.Width || s.WindowHeight != _window.Height)
+            {
+                s.WindowMaximized = false;
+                s.WindowLeft = _window.Left;
+                s.WindowTop = _window.Top;
+                s.WindowWidth = _window.Width;
+                s.WindowHeight = _window.Height;
+                changed = true;
+            }
         }
-        _settings.Save();
-        _log.LogInformation("Window state saved");
+        if (changed)
+        {
+            _settings.Save();
+            _log.LogInformation("Window state saved");
+        }
     }
 
     public void SetAlwaysOnTop(bool value)

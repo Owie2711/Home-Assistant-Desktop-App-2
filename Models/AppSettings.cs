@@ -6,7 +6,6 @@ public sealed class AppSettings
 {
     public bool StartWithWindows { get; set; }
     public bool AlwaysOnTop { get; set; }
-    public bool MinimizeOnClose { get; set; } = true;
     public bool Fullscreen { get; set; }
     public bool StartMinimized { get; set; }
     public double WindowWidth { get; set; } = 1280;

@@ -20,7 +20,6 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty] private bool _startWithWindows;
     [ObservableProperty] private bool _alwaysOnTop;
-    [ObservableProperty] private bool _minimizeOnClose;
     [ObservableProperty] private bool _startMinimized;
     [ObservableProperty] private bool _fullscreen;
 
@@ -59,7 +58,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         var s = _settings.Settings;
         StartWithWindows = s.StartWithWindows;
         AlwaysOnTop = s.AlwaysOnTop;
-        MinimizeOnClose = s.MinimizeOnClose;
         StartMinimized = s.StartMinimized;
         Fullscreen = s.Fullscreen;
 
@@ -90,7 +88,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         _settings.Save();
     }
 
-    partial void OnMinimizeOnCloseChanged(bool value) { _settings.Settings.MinimizeOnClose = value; _settings.Save(); }
     partial void OnStartMinimizedChanged(bool value) { _settings.Settings.StartMinimized = value; _settings.Save(); }
     partial void OnFullscreenChanged(bool value) { _settings.Settings.Fullscreen = value; _settings.Save(); }
 
