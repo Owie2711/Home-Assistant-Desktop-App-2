@@ -48,8 +48,7 @@ public sealed class SettingsService
                 _log.LogError(ex, "Failed to load settings, using defaults");
             }
 
-            SeedDefaults();
-            SaveLocked();
+            _log.LogInformation("No existing settings, starting fresh");
         }
     }
 
@@ -72,16 +71,5 @@ public sealed class SettingsService
         {
             _log.LogError(ex, "Failed to save settings");
         }
-    }
-
-    private void SeedDefaults()
-    {
-        Settings.Servers.Add(new ServerProfile
-        {
-            Name = "Home",
-            Url = "http://10.0.0.114:8123",
-            IsDefault = true
-        });
-        Settings.ActiveServerId = Settings.Servers[0].Id;
     }
 }

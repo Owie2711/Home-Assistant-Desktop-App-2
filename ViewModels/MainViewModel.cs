@@ -25,6 +25,9 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _showError;
     [ObservableProperty] private string _errorText = "";
     [ObservableProperty] private bool _errorMode;
+    [ObservableProperty] private bool _isFirstRun;
+    [ObservableProperty] private string _setupUrl = "http://";
+    [ObservableProperty] private bool _setupError;
 
     public MainViewModel(WebViewService webView, WindowService window, SettingsService settings,
         ServerManager servers, TrayService tray, ILogger log)
@@ -45,8 +48,15 @@ public sealed partial class MainViewModel : ObservableObject
         try
         {
             var server = _servers.GetActive();
-            ActiveServerName = server?.Name ?? "—";
-            _currentServerId = server?.Id;
+            if (server is null)
+            {
+                IsFirstRun = true;
+                ActiveServerName = "";
+                return;
+            }
+            IsFirstRun = false;
+            ActiveServerName = server.Name;
+            _currentServerId = server.Id;
             await _webView.InitializeAsync();
             _window.ApplyFullscreenOnLoad();
         }
@@ -100,6 +110,7 @@ public sealed partial class MainViewModel : ObservableObject
     public ICommand SettingsCommand => new RelayCommand(() => SettingsRequested?.Invoke());
     public ICommand FullscreenCommand => new RelayCommand(() => _window.ToggleFullscreen());
     public ICommand RetryCommand => new RelayCommand(() => _ = _webView.NavigateToServerAsync());
+    public AsyncRelayCommand SetupCommand => new(ExecuteSetupAsync);
 
     public event Action? SettingsRequested;
 
@@ -114,6 +125,43 @@ public sealed partial class MainViewModel : ObservableObject
             ActiveServerName = server.Name;
             await _webView.SwitchServerAsync(server.Id);
             _currentServerId = server.Id;
+        }
+    }
+
+    private async Task ExecuteSetupAsync()
+    {
+        if (string.IsNullOrWhiteSpace(SetupUrl)) return;
+        if (!Uri.TryCreate(SetupUrl.Trim(), UriKind.Absolute, out var uri) ||
+            (uri.Scheme != "http" && uri.Scheme != "https"))
+        {
+            ErrorText = "URL tidak valid. Gunakan format http://host:port";
+            SetupError = true;
+            ShowError = false;
+            return;
+        }
+
+        SetupError = false;
+        ShowError = false;
+        var profile = new ServerProfile { Name = "Home Assistant", Url = SetupUrl.Trim(), IsDefault = true };
+        _servers.AddOrUpdate(profile);
+        _settings.Save();
+        _tray.RebuildServerMenu();
+
+        IsFirstRun = false;
+        ActiveServerName = profile.Name;
+        _currentServerId = profile.Id;
+
+        try
+        {
+            await _webView.InitializeAsync();
+            _window.ApplyFullscreenOnLoad();
+        }
+        catch (Exception ex)
+        {
+            _log.LogError(ex, "Failed to initialize after setup");
+            ErrorMode = true;
+            ShowError = true;
+            ErrorText = "WebView2 could not be initialized.\n\nPlease install or update the Microsoft Edge WebView2 Runtime.";
         }
     }
 }

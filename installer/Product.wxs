@@ -1,43 +1,157 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
-     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
 
   <Package Name="Home Assistant Desktop App" Version="0.1.0" Manufacturer="Home Assistant Desktop"
-           ProductCode="BEA34346-BFDC-4AAA-B171-1CD30F55C92F"
            UpgradeCode="9f3b8c2e-1a4d-4f7e-9b2c-1d2e3f4a5b6c" Language="1033">
 
-    <MajorUpgrade DowngradeErrorMessage="A newer version is already installed." />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of Home Assistant Desktop is already installed."
+                  AllowSameVersionUpgrades="yes" />
+
     <MediaTemplate EmbedCab="yes" />
 
     <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLDIR" />
 
     <Property Id="INSTALLDIR" Value="C:\Program Files\Home Assistant Desktop App" />
 
+    <!-- ===== DIRECTORY STRUCTURE ===== -->
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="INSTALLDIR" Name="Home Assistant Desktop App">
-        <Component Id="MainExecutable" Guid="*">
+
+        <Component Id="MainExecutable" Guid="bea34346-bfdc-4aaa-b171-1cd30f55c92f">
           <File Source="D:\HOBIES\Github\HOME-ASSISTANT-APP\publish\HomeAssistantDesktop.exe" KeyPath="yes" />
           <File Source="D:\HOBIES\Github\HOME-ASSISTANT-APP\publish\Home Assistant.ico" />
-          <RegistryValue Root="HKCU" Key="Software\HomeAssistantDesktop" Name="Installed" Value="1" Type="integer" />
-          <Shortcut Id="DesktopShortcut" Directory="DesktopFolder"
-                    Name="Home Assistant Desktop" Icon="homeassistant.ico"
-                    WorkingDirectory="INSTALLDIR" Advertise="no" />
-          <Shortcut Id="StartMenuShortcut" Directory="StartMenuFolder"
-                    Name="Home Assistant Desktop" Icon="homeassistant.ico"
-                    WorkingDirectory="INSTALLDIR" Advertise="no" />
         </Component>
+
+        <Component Id="DesktopShortcutComp" Directory="DesktopFolder" Guid="d7c4e5f6-1234-5678-abcd-ef0123456789">
+          <Shortcut Id="DesktopShortcutLink"
+                    Name="Home Assistant Desktop"
+                    Target="[INSTALLDIR]HomeAssistantDesktop.exe"
+                    WorkingDirectory="INSTALLDIR"
+                    Icon="homeassistant.ico"
+                    Description="Open Home Assistant Desktop" />
+          <RegistryValue Root="HKCU" Key="Software\HomeAssistantDesktop\Shortcuts"
+                         Name="Desktop" Value="1" Type="integer" KeyPath="yes" />
+        </Component>
+
       </Directory>
     </StandardDirectory>
 
-    <StandardDirectory Id="ProgramMenuFolder">
-      <Directory Id="StartMenuFolder" Name="Home Assistant Desktop" />
-    </StandardDirectory>
+    <!-- Start Menu shortcut -->
+    <Component Id="StartMenuShortcut" Directory="StartMenuFolder" Guid="a1b2c3d4-5678-9abc-def0-1234567890ab">
+      <Shortcut Id="StartMenuLink"
+                Name="Home Assistant Desktop"
+                Target="[INSTALLDIR]HomeAssistantDesktop.exe"
+                WorkingDirectory="INSTALLDIR"
+                Icon="homeassistant.ico"
+                Description="Open Home Assistant Desktop" />
+      <Shortcut Id="UninstallLink"
+                Name="Uninstall Home Assistant Desktop"
+                Target="[SystemFolder]msiexec.exe"
+                Arguments="/x [ProductCode]"
+                Description="Uninstall Home Assistant Desktop" />
+      <RegistryValue Root="HKCU" Key="Software\HomeAssistantDesktop\Shortcuts"
+                     Name="StartMenu" Value="1" Type="integer" KeyPath="yes" />
+    </Component>
 
     <StandardDirectory Id="DesktopFolder" />
 
+    <!-- ===== APP REGISTRY ===== -->
+    <Component Id="AppRegistration" Directory="INSTALLDIR" Guid="b2c3d4e5-6789-abcd-ef01-234567890abc">
+      <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\HomeAssistantDesktop"
+                     Name="DisplayName" Value="Home Assistant Desktop" Type="string" />
+      <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\HomeAssistantDesktop"
+                     Name="DisplayVersion" Value="0.1.0" Type="string" />
+      <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\HomeAssistantDesktop"
+                     Name="Publisher" Value="Home Assistant Desktop" Type="string" />
+      <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\HomeAssistantDesktop"
+                     Name="InstallLocation" Value="[INSTALLDIR]" Type="string" />
+      <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\HomeAssistantDesktop"
+                     Name="UninstallString" Value="msiexec.exe /x [ProductCode]" Type="string" />
+      <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\HomeAssistantDesktop"
+                     Name="QuietUninstallString" Value="msiexec.exe /x [ProductCode] /quiet" Type="string" />
+      <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\HomeAssistantDesktop"
+                     Name="InstallSource" Value="[INSTALLDIR]" Type="string" />
+      <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\HomeAssistantDesktop"
+                     Name="NoModify" Value="1" Type="integer" />
+      <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\HomeAssistantDesktop"
+                     Name="NoRepair" Value="1" Type="integer" />
+      <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\HomeAssistantDesktop"
+                     Name="EstimatedSize" Value="65000" Type="integer" />
+    </Component>
+
+    <Component Id="AppPath" Directory="INSTALLDIR" Guid="c3d4e5f6-789a-bcde-f012-3456789012cd">
+      <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\HomeAssistantDesktop.exe"
+                     Name="(Default)" Value="[INSTALLDIR]HomeAssistantDesktop.exe" Type="string" />
+      <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\HomeAssistantDesktop.exe"
+                     Name="Path" Value="[INSTALLDIR]" Type="string" />
+    </Component>
+
+    <Component Id="AppUserModelId" Directory="INSTALLDIR" Guid="d4e5f6a7-89ab-cdef-0123-456789012345">
+      <RegistryValue Root="HKCU" Key="Software\HomeAssistantDesktop"
+                     Name="AppUserModelId" Value="HomeAssistantDesktop" Type="string" />
+    </Component>
+
+    <!-- ===== CLEANUP ON UNINSTALL ===== -->
+    <!-- Properties for RemoveFolderEx -->
+    <Property Id="APPDATA_CONFIG" Value="C:\Users\Zowie Bowie\AppData\Local\HomeAssistantDesktop\Config" />
+    <Property Id="APPDATA_WEBVIEW2" Value="C:\Users\Zowie Bowie\AppData\Local\HomeAssistantDesktop\WebView2" />
+    <Property Id="APPDATA_LOGS" Value="C:\Users\Zowie Bowie\AppData\Local\HomeAssistantDesktop\Logs" />
+    <Property Id="APPDATA_BASE" Value="C:\Users\Zowie Bowie\AppData\Local\HomeAssistantDesktop" />
+
+    <!-- Cleanup components -->
+    <Component Id="CleanupConfig" Directory="INSTALLDIR" Guid="e1f2a3b4-c5d6-7890-abcd-ef1234567890">
+      <RegistryValue Root="HKCU" Key="Software\HomeAssistantDesktop\Cleanup"
+                     Name="Config" Value="1" Type="integer" KeyPath="yes" />
+      <util:RemoveFolderEx Id="CleanupConfigFolder" Property="APPDATA_CONFIG" />
+    </Component>
+
+    <Component Id="CleanupWebView2" Directory="INSTALLDIR" Guid="f2a3b4c5-d6e7-8901-bcde-f12345678901">
+      <RegistryValue Root="HKCU" Key="Software\HomeAssistantDesktop\Cleanup"
+                     Name="WebView2" Value="1" Type="integer" KeyPath="yes" />
+      <util:RemoveFolderEx Id="CleanupWebView2Folder" Property="APPDATA_WEBVIEW2" />
+    </Component>
+
+    <Component Id="CleanupLogs" Directory="INSTALLDIR" Guid="a3b4c5d6-e7f8-9012-cdef-123456789012">
+      <RegistryValue Root="HKCU" Key="Software\HomeAssistantDesktop\Cleanup"
+                     Name="Logs" Value="1" Type="integer" KeyPath="yes" />
+      <util:RemoveFolderEx Id="CleanupLogsFolder" Property="APPDATA_LOGS" />
+    </Component>
+
+    <Component Id="CleanupBase" Directory="INSTALLDIR" Guid="b4c5d6e7-f8a9-0123-def0-234567890123">
+      <RegistryValue Root="HKCU" Key="Software\HomeAssistantDesktop\Cleanup"
+                     Name="Base" Value="1" Type="integer" KeyPath="yes" />
+      <util:RemoveFolderEx Id="CleanupBaseFolder" Property="APPDATA_BASE" />
+    </Component>
+
+    <!-- Force-delete AppData folder tree on uninstall -->
+    <CustomAction Id="ForceRemoveAppData" Directory="INSTALLDIR"
+                  ExeCommand="[SystemFolder]cmd.exe /c rmdir /s /q &quot;%LOCALAPPDATA%\HomeAssistantDesktop&quot;"
+                  Execute="deferred" Impersonate="no" />
+
+    <!-- ===== ICON ===== -->
     <Icon Id="homeassistant.ico" SourceFile="D:\HOBIES\Github\HOME-ASSISTANT-APP\publish\Home Assistant.ico" />
 
-    <Feature Id="Complete" Title="Home Assistant Desktop App" Level="1">
+    <!-- ===== FEATURE ===== -->
+    <Feature Id="Complete" Title="Home Assistant Desktop" Level="1"
+             Description="Install Home Assistant Desktop and all required files."
+             AllowAbsent="no">
       <ComponentRef Id="MainExecutable" />
+      <ComponentRef Id="DesktopShortcutComp" />
+      <ComponentRef Id="StartMenuShortcut" />
+      <ComponentRef Id="AppRegistration" />
+      <ComponentRef Id="AppPath" />
+      <ComponentRef Id="AppUserModelId" />
+      <ComponentRef Id="CleanupConfig" />
+      <ComponentRef Id="CleanupWebView2" />
+      <ComponentRef Id="CleanupLogs" />
+      <ComponentRef Id="CleanupBase" />
     </Feature>
+
+    <!-- ===== PROPERTIES ===== -->
+    <Property Id="ARPHELPLINK" Value="https://www.home-assistant.io/" />
+    <Property Id="ARPURLINFOABOUT" Value="https://www.home-assistant.io/" />
+    <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />
+
   </Package>
 </Wix>

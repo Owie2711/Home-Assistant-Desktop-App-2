@@ -44,6 +44,33 @@
                          Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
                          Background="Transparent" Foreground="{DynamicResource Accent}"/>
 
+            <!-- Setup overlay (first run) -->
+            <Border Background="#1b1b1f" Visibility="{Binding IsFirstRun, Converter={StaticResource BoolToVis}}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="400">
+                    <TextBlock Text="Home Assistant Desktop" FontSize="20" FontWeight="Bold"
+                               Foreground="{DynamicResource Accent}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Masukkan alamat server Home Assistant Anda untuk memulai."
+                               Margin="0,16,0,0" FontSize="13" Foreground="{DynamicResource SubtleText}"
+                               HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"/>
+                    <TextBox Text="{Binding SetupUrl, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,20,0,0" Height="36" FontSize="14"
+                             Background="#2a2a32" Foreground="{DynamicResource TextBrush}"
+                             BorderBrush="#3a3a42" BorderThickness="1"
+                             HorizontalContentAlignment="Center"/>
+                    <TextBlock Text="Contoh: http://192.168.1.100:8123"
+                               Margin="0,6,0,0" FontSize="11" Foreground="#666"
+                               HorizontalAlignment="Center"/>
+                    <Button Content="Hubungkan" Margin="0,16,0,0" Height="36" Width="140"
+                            Command="{Binding SetupCommand}"
+                            Background="{DynamicResource Accent}" Foreground="White" BorderThickness="0"
+                            HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding ErrorText}" Margin="0,12,0,0" FontSize="12"
+                               Foreground="#f44336" HorizontalAlignment="Center"
+                               TextWrapping="Wrap" TextAlignment="Center"
+                               Visibility="{Binding SetupError, Converter={StaticResource BoolToVis}}"/>
+                </StackPanel>
+            </Border>
+
             <!-- Error overlay -->
             <Border Background="#1b1b1f" Visibility="{Binding ShowError, Converter={StaticResource BoolToVis}}">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="420">
