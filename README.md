@@ -1,56 +1,110 @@
 # Home Assistant Desktop
 
-Native Windows desktop client untuk Home Assistant, dibangun dengan C#, WPF, dan WebView2. Menyediakan akses cepat ke dashboard Home Assistant dengan fitur-fitur bawaan seperti always-on-top, multi-server, zoom persistence, dan system tray.
+A native Windows desktop client for Home Assistant, built with C#, WPF, and WebView2. Provides quick access to the Home Assistant dashboard with built-in features like always-on-top, multi-server support, zoom persistence, and system tray integration.
 
-## Fitur
+[![Download MSI](https://img.shields.io/badge/Download-Installer-blue)](https://github.com/Owie2711/HOME-ASSISTANT-APP/releases/download/v0.1.0/HomeAssistantDesktopSetup.msi)
 
-- **Dashboard penuh**: Menampilkan antarmuka Home Assistant asli melalui WebView2
-- **Multi-server**: Tambah, edit, hapus, dan beralih antar server Home Assistant
-- **Always-on-top brutal**: Tetap di atas semua jendela, tahan terhadap Win+D / Show Desktop
-- **Zoom persistence**: Perubahan zoom (Ctrl+/-) tersimpan otomatis
-- **System tray**: Minimize ke tray, akses cepat, server switching dari tray
-- **Startup registry**: Opsi start with Windows
-- **Window state persistence**: Ukuran, posisi, dan maximized state tersimpan
-- **Fullscreen**: Tekan F11
-- **Installer MSI**: Instalasi ke `C:\Program Files\Home Assistant Desktop App`, shortcut desktop & start menu
+## Features
 
-## Teknologi
+- **Full dashboard** — Renders the native Home Assistant UI through WebView2
+- **Multi-server** — Add, edit, delete, and switch between Home Assistant servers
+- **Brutal always-on-top** — Stays above all windows, survives Win+D / Show Desktop
+- **Zoom persistence** — Zoom changes (Ctrl+/-) are saved automatically per server
+- **System tray** — Minimize to tray, quick access, server switching from tray menu
+- **Startup with Windows** — Optional auto-start via Windows Registry
+- **Window state persistence** — Size, position, and maximized state are restored on launch
+- **Fullscreen** — Press F11 to toggle
+- **First-run setup** — Guided wizard on first launch to configure your server
+- **MSI installer** — Installs to `C:\Program Files\Home Assistant Desktop App` with Desktop & Start Menu shortcuts
+- **Self-contained** — No .NET runtime installation required
 
-- .NET 10 / C# / WPF
-- WebView2 Runtime (harus terinstall)
-- CommunityToolkit.Mvvm
-- WiX Toolset v4 (untuk installer)
-
-## Persyaratan
+## Requirements
 
 - Windows 10/11 (x64)
-- [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/)
+- [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) (pre-installed on Windows 10 20H2+ and Windows 11)
 
-## Instalasi
+## Installation
 
-Unduh `HomeAssistantDesktopSetup.msi` dari [Releases](https://github.com/Owie2711/HOME-ASSISTANT-APP/releases), jalankan, ikuti wizard. Aplikasi akan terinstal di `C:\Program Files\Home Assistant Desktop App`.
+Download `HomeAssistantDesktopSetup.msi` from [Releases](https://github.com/Owie2711/HOME-ASSISTANT-APP/releases), run it, and follow the wizard. The app installs to `C:\Program Files\Home Assistant Desktop App`.
 
-## Build dari source
+## Building from Source
+
+### Prerequisites
+
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- [WiX Toolset v4](https://wixtoolset.org/) (for building the MSI installer)
+
+### Steps
 
 ```powershell
-# Clone repo
+# Clone the repo
 git clone https://github.com/Owie2711/HOME-ASSISTANT-APP.git
 cd HOME-ASSISTANT-APP
 
-# Restore & build/publish
-dotnet restore
+# Publish (self-contained single-file executable)
 dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true -p:SelfContained=true -o publish
 
-# Build installer (perlu WiX v4)
+# Build the MSI installer
 dotnet tool install --global wix
 cd installer
-wix build Product.wxs -arch x64 -ext WixToolset.UI.wixext -o HomeAssistantDesktopSetup.msi
+wix build Product.wxs -arch x64 -ext WixToolset.UI.wixext -ext WixToolset.Util.wixext -o HomeAssistantDesktopSetup.msi
 ```
 
-## Konfigurasi
+The published output goes to `publish/` and the installer to `installer/HomeAssistantDesktopSetup.msi`.
 
-Pengaturan disimpan di `%LOCALAPPDATA%\HomeAssistantDesktop\Config\settings.json`. Data WebView2 per-server di `%LOCALAPPDATA%\HomeAssistantDesktop\WebView2\server-<id>`.
+## Configuration
 
-## Lisensi
+| File | Location |
+|------|----------|
+| Settings | `%LOCALAPPDATA%\HomeAssistantDesktop\Config\settings.json` |
+| WebView2 data (per server) | `%LOCALAPPDATA%\HomeAssistantDesktop\WebView2\server-<id>` |
+| Logs | `%LOCALAPPDATA%\HomeAssistantDesktop\Logs\ha-desktop-YYYY-MM-DD.log` |
+
+## Project Structure
+
+```
+├── App.xaml / App.xaml.cs          # Application entry point, DI container setup
+├── Models/
+│   ├── AppSettings.cs              # Settings POCO (serialized to JSON)
+│   └── ServerProfile.cs            # Server profile model
+├── Services/
+│   ├── FileLogger.cs               # Buffered file logger with daily rotation
+│   ├── ServerManager.cs            # Server CRUD operations
+│   ├── SettingsService.cs          # JSON settings persistence with debounced save
+│   ├── SingleInstanceService.cs    # Named Mutex single-instance guard
+│   ├── StartupService.cs           # Windows auto-start via Registry
+│   ├── TrayService.cs              # System tray with server switching menu
+│   ├── WebViewService.cs           # WebView2 lifecycle, connection probing
+│   └── WindowService.cs            # Window state, brutal always-on-top via Win32
+├── ViewModels/
+│   ├── MainViewModel.cs            # Main window ViewModel
+│   └── SettingsViewModel.cs        # Settings window ViewModel
+├── Views/
+│   ├── MainWindow.xaml / .cs       # Main window with WebView2 and overlays
+│   └── SettingsWindow.xaml / .cs   # Settings dialog
+├── Converters/
+│   └── BoolToVisibilityConverter.cs
+├── Resources/
+│   ├── Strings.resx                # Localized UI strings (English)
+│   └── Strings.Designer.cs         # Strongly-typed resource accessor
+└── installer/
+    └── Product.wxs                 # WiX installer definition
+```
+
+## Architecture
+
+- **DI Container** — Services are registered via `Microsoft.Extensions.DependencyInjection` in `App.xaml.cs`
+- **MVVM** — ViewModels use [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/) with source generators (`[ObservableProperty]`, `[RelayCommand]`)
+- **Brutal always-on-top** — Win32 interop intercepts `WM_WINDOWPOSCHANGING`, `WM_SHOWWINDOW`, `WM_SIZE`, and `WM_ACTIVATE` to force `HWND_TOPMOST` + `WS_EX_TOOLWINDOW`
+- **Connection probing** — Background HTTP probe on navigation start with cancellation token management
+
+## Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| F11 | Toggle fullscreen |
+| Escape | Close settings window |
+
+## License
 
 MIT
