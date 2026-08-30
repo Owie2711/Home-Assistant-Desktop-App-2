@@ -8,6 +8,7 @@ namespace HomeAssistantDesktop.Services;
 public sealed class SettingsService
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private readonly object _lock = new();
 
     private readonly string _configDir;
     private readonly string _filePath;
@@ -26,30 +27,41 @@ public sealed class SettingsService
 
     public void Load()
     {
-        try
+        lock (_lock)
         {
-            if (File.Exists(_filePath))
+            try
             {
-                var json = File.ReadAllText(_filePath);
-                var loaded = JsonSerializer.Deserialize<AppSettings>(json);
-                if (loaded is not null)
+                if (File.Exists(_filePath))
                 {
-                    Settings = loaded;
-                    _log.LogInformation("Settings loaded from {Path}", _filePath);
-                    return;
+                    var json = File.ReadAllText(_filePath);
+                    var loaded = JsonSerializer.Deserialize<AppSettings>(json);
+                    if (loaded is not null)
+                    {
+                        Settings = loaded;
+                        _log.LogInformation("Settings loaded from {Path}", _filePath);
+                        return;
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            _log.LogError(ex, "Failed to load settings, using defaults");
-        }
+            catch (Exception ex)
+            {
+                _log.LogError(ex, "Failed to load settings, using defaults");
+            }
 
-        SeedDefaults();
-        Save();
+            SeedDefaults();
+            SaveLocked();
+        }
     }
 
     public void Save()
+    {
+        lock (_lock)
+        {
+            SaveLocked();
+        }
+    }
+
+    private void SaveLocked()
     {
         try
         {

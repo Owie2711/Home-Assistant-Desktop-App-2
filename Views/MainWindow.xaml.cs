@@ -9,7 +9,6 @@ namespace HomeAssistantDesktop.Views;
     public partial class MainWindow : Window
     {
         private readonly MainViewModel _vm;
-        private bool _isClosing;
 
         public MainWindow()
         {
@@ -35,7 +34,6 @@ namespace HomeAssistantDesktop.Views;
 
         private void MainWindow_StateChanged(object? sender, EventArgs e)
         {
-            if (_isClosing) return;
             if (!App.Settings.Settings.AlwaysOnTop) return;
             if (WindowState == WindowState.Minimized)
             {
@@ -45,7 +43,6 @@ namespace HomeAssistantDesktop.Views;
 
         private void MainWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (_isClosing) return;
             if (!App.Settings.Settings.AlwaysOnTop) return;
             if (!IsVisible)
             {
@@ -56,7 +53,6 @@ namespace HomeAssistantDesktop.Views;
         private System.Windows.Threading.DispatcherTimer? _saveTimer;
         private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (_isClosing) return;
             if (WindowState == WindowState.Minimized) return;
             if (_saveTimer == null)
             {
@@ -102,12 +98,6 @@ namespace HomeAssistantDesktop.Views;
         {
             App.Window.SaveState();
             base.OnClosing(e);
-        }
-
-        protected override void OnStateChanged(EventArgs e)
-        {
-            base.OnStateChanged(e);
-            if (_isClosing) return;
         }
 
         private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)

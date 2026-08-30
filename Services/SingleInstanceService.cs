@@ -18,7 +18,10 @@ public sealed class SingleInstanceService : IDisposable
 
     public void Dispose()
     {
-        try { _mutex.ReleaseMutex(); } catch { }
+        if (IsFirstInstance)
+        {
+            try { _mutex.ReleaseMutex(); } catch { }
+        }
         _mutex.Dispose();
     }
 }

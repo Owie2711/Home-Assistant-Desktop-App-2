@@ -5,3 +5,16 @@ obj/
 WebView2/
 Logs/
 .Config/
+
+# build & installer artifacts (too big for GitHub / regenerable)
+publish/
+dist/
+installer/*.msi
+installer/*.wixpdb
+installer/*.zip
+installer/*.nupkg
+installer/*.log
+installer/.wix/
+installer/uitmp/
+installer/uitmp406/
+installer/utiltmp/

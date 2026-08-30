@@ -1,0 +1,43 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <Package Name="Home Assistant Desktop App" Version="0.1.0" Manufacturer="Home Assistant Desktop"
+           ProductCode="BEA34346-BFDC-4AAA-B171-1CD30F55C92F"
+           UpgradeCode="9f3b8c2e-1a4d-4f7e-9b2c-1d2e3f4a5b6c" Language="1033">
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLDIR" />
+
+    <Property Id="INSTALLDIR" Value="C:\Program Files\Home Assistant Desktop App" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLDIR" Name="Home Assistant Desktop App">
+        <Component Id="MainExecutable" Guid="*">
+          <File Source="D:\HOBIES\Github\HOME-ASSISTANT-APP\publish\HomeAssistantDesktop.exe" KeyPath="yes" />
+          <File Source="D:\HOBIES\Github\HOME-ASSISTANT-APP\publish\Home Assistant.ico" />
+          <RegistryValue Root="HKCU" Key="Software\HomeAssistantDesktop" Name="Installed" Value="1" Type="integer" />
+          <Shortcut Id="DesktopShortcut" Directory="DesktopFolder"
+                    Name="Home Assistant Desktop" Icon="homeassistant.ico"
+                    WorkingDirectory="INSTALLDIR" Advertise="no" />
+          <Shortcut Id="StartMenuShortcut" Directory="StartMenuFolder"
+                    Name="Home Assistant Desktop" Icon="homeassistant.ico"
+                    WorkingDirectory="INSTALLDIR" Advertise="no" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="StartMenuFolder" Name="Home Assistant Desktop" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder" />
+
+    <Icon Id="homeassistant.ico" SourceFile="D:\HOBIES\Github\HOME-ASSISTANT-APP\publish\Home Assistant.ico" />
+
+    <Feature Id="Complete" Title="Home Assistant Desktop App" Level="1">
+      <ComponentRef Id="MainExecutable" />
+    </Feature>
+  </Package>
+</Wix>
