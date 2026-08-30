@@ -229,21 +229,21 @@ public sealed class WindowService
         SetBrutalTopMost(true);
     }
 
-    public void ToggleFullscreen()
+    public void ToggleFullscreen(bool? force = null)
     {
         if (_window is null) return;
         var s = _settings.Settings;
-        if (s.Fullscreen)
+        var goFull = force ?? !s.Fullscreen;
+        s.Fullscreen = goFull;
+        if (goFull)
         {
-            s.Fullscreen = false;
-            _window.WindowStyle = WindowStyle.SingleBorderWindow;
-            _window.WindowState = s.WindowMaximized ? WindowState.Maximized : WindowState.Normal;
+            _window.WindowStyle = WindowStyle.None;
+            _window.WindowState = WindowState.Maximized;
         }
         else
         {
-            s.Fullscreen = true;
-            _window.WindowStyle = WindowStyle.None;
-            _window.WindowState = WindowState.Maximized;
+            _window.WindowStyle = WindowStyle.SingleBorderWindow;
+            _window.WindowState = s.WindowMaximized ? WindowState.Maximized : WindowState.Normal;
         }
         _settings.Save();
     }

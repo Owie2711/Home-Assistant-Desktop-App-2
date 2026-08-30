@@ -1,10 +1,10 @@
 <Window x:Class="HomeAssistantDesktop.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="clr-namespace:HomeAssistantDesktop.ViewModels"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         xmlns:local="clr-namespace:HomeAssistantDesktop"
-        Title="Home Assistant Desktop"
+        Title="{x:Static res:Strings.AppTitle}"
+        xmlns:res="clr-namespace:HomeAssistantDesktop.Resources"
         MinWidth="100" MinHeight="80"
         ResizeMode="CanResize"
         Background="{DynamicResource WindowBackground}"
@@ -47,9 +47,9 @@
             <!-- Setup overlay (first run) -->
             <Border Background="#1b1b1f" Visibility="{Binding IsFirstRun, Converter={StaticResource BoolToVis}}">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="400">
-                    <TextBlock Text="Home Assistant Desktop" FontSize="20" FontWeight="Bold"
+                    <TextBlock Text="{x:Static res:Strings.AppTitle}" FontSize="20" FontWeight="Bold"
                                Foreground="{DynamicResource Accent}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Masukkan alamat server Home Assistant Anda untuk memulai."
+                    <TextBlock Text="{x:Static res:Strings.Setup_Subtitle}"
                                Margin="0,16,0,0" FontSize="13" Foreground="{DynamicResource SubtleText}"
                                HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"/>
                     <TextBox Text="{Binding SetupUrl, UpdateSourceTrigger=PropertyChanged}"
@@ -57,10 +57,10 @@
                              Background="#2a2a32" Foreground="{DynamicResource TextBrush}"
                              BorderBrush="#3a3a42" BorderThickness="1"
                              HorizontalContentAlignment="Center"/>
-                    <TextBlock Text="Contoh: http://192.168.1.100:8123"
+                    <TextBlock Text="{x:Static res:Strings.Setup_UrlPlaceholder}"
                                Margin="0,6,0,0" FontSize="11" Foreground="#666"
                                HorizontalAlignment="Center"/>
-                    <Button Content="Hubungkan" Margin="0,16,0,0" Height="36" Width="140"
+                    <Button Content="{x:Static res:Strings.Setup_Connect}" Margin="0,16,0,0" Height="36" Width="140"
                             Command="{Binding SetupCommand}"
                             Background="{DynamicResource Accent}" Foreground="White" BorderThickness="0"
                             HorizontalAlignment="Center"/>
@@ -74,14 +74,19 @@
             <!-- Error overlay -->
             <Border Background="#1b1b1f" Visibility="{Binding ShowError, Converter={StaticResource BoolToVis}}">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="420">
-                    <TextBlock Text="⚠ Home Assistant is unavailable" FontSize="18" Foreground="{DynamicResource TextBrush}"
+                    <TextBlock Text="{x:Static res:Strings.Error_OfflineTitle}" FontSize="18" Foreground="{DynamicResource TextBrush}"
                                HorizontalAlignment="Center" TextWrapping="Wrap"/>
                     <TextBlock Text="{Binding ErrorText}" Margin="0,12,0,0" FontSize="13"
                                Foreground="{DynamicResource SubtleText}" HorizontalAlignment="Center" TextWrapping="Wrap"/>
+                    <TextBlock Margin="0,8,0,0" FontSize="12" HorizontalAlignment="Center">
+                        <Hyperlink NavigateUri="{Binding WebView2DownloadLink}">
+                            <Run Text="Download WebView2 Runtime"/>
+                        </Hyperlink>
+                    </TextBlock>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,18,0,0">
-                        <Button Content="Retry" Width="100" Height="32" Margin="6,0" Click="Retry_Click"
+                        <Button Content="{x:Static res:Strings.Error_Retry}" Width="100" Height="32" Margin="6,0" Click="Retry_Click"
                                 Background="{DynamicResource Accent}" Foreground="White" BorderThickness="0"/>
-                        <Button Content="Settings" Width="100" Height="32" Margin="6,0" Click="ErrorSettings_Click"
+                        <Button Content="{x:Static res:Strings.Error_Settings}" Width="100" Height="32" Margin="6,0" Click="ErrorSettings_Click"
                                 Background="Transparent" Foreground="{DynamicResource TextBrush}" BorderBrush="#3a3a42"/>
                     </StackPanel>
                 </StackPanel>

@@ -5,6 +5,7 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HomeAssistantDesktop.Models;
+using HomeAssistantDesktop.Resources;
 using HomeAssistantDesktop.Services;
 using Microsoft.Extensions.Logging;
 
@@ -17,6 +18,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly StartupService _startup;
     private readonly WindowService _window;
     private readonly ILogger _log;
+    private static readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(8) };
 
     [ObservableProperty] private bool _startWithWindows;
     [ObservableProperty] private bool _alwaysOnTop;
@@ -89,14 +91,17 @@ public sealed partial class SettingsViewModel : ObservableObject
     }
 
     partial void OnStartMinimizedChanged(bool value) { _settings.Settings.StartMinimized = value; _settings.Save(); }
-    partial void OnFullscreenChanged(bool value) { _settings.Settings.Fullscreen = value; _settings.Save(); }
+    partial void OnFullscreenChanged(bool value)
+    {
+        _window.ToggleFullscreen(force: value);
+    }
 
     private void AddServer()
     {
         EditingServer = null;
         IsEditing = true;
-        EditName = "New Server";
-        EditUrl = "http://192.168.1.100:8123";
+        EditName = Strings.NewServer_Name;
+        EditUrl = Strings.NewServer_Url;
         EditIsDefault = Servers.Count == 0;
         EditUrlInvalid = false;
         TestStatus = "";
@@ -130,7 +135,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             (uri.Scheme != "http" && uri.Scheme != "https"))
         {
             EditUrlInvalid = true;
-            TestStatus = "URL tidak valid. Gunakan format http://host:port atau https://...";
+            TestStatus = Strings.Test_UrlInvalidFormat;
             HasTestStatus = true;
             _log.LogWarning("Invalid server URL: {Url}", EditUrl);
             return;
@@ -163,7 +168,8 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         if (s is null) return;
         var result = System.Windows.MessageBox.Show(
-            $"Delete server '{s.Name}' ({s.Url})?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            string.Format(Strings.Settings_ConfirmDelete, s.Name, s.Url),
+            Strings.Settings_ConfirmDeleteTitle, MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (result != MessageBoxResult.Yes) return;
         _servers.Delete(s.Id);
         Servers.Remove(s);
@@ -178,24 +184,23 @@ public sealed partial class SettingsViewModel : ObservableObject
             if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
                 (uri.Scheme != "http" && uri.Scheme != "https"))
             {
-                TestStatus = "URL tidak valid.";
+                TestStatus = Strings.Test_UrlInvalid;
                 HasTestStatus = true;
                 return;
             }
-            TestStatus = "Testing...";
+            TestStatus = Strings.Test_Testing;
             HasTestStatus = true;
-            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(8) };
             var baseUri = $"{uri.Scheme}://{uri.Host}:{uri.Port}";
-            var resp = await client.GetAsync(baseUri);
+            var resp = await _httpClient.GetAsync(baseUri);
             TestStatus = resp.IsSuccessStatusCode || resp.StatusCode == System.Net.HttpStatusCode.Unauthorized
-                ? $"OK — server reachable ({resp.StatusCode})."
-                : $"Reachable but returned {resp.StatusCode}.";
+                ? string.Format(Strings.Test_Ok, resp.StatusCode)
+                : string.Format(Strings.Test_ReachableWithStatus, resp.StatusCode);
             HasTestStatus = true;
             _log.LogInformation("Test connection to {Url}: {Status}", url, resp.StatusCode);
         }
         catch (Exception ex)
         {
-            TestStatus = $"Failed: {ex.Message}";
+            TestStatus = string.Format(Strings.Test_Failed, ex.Message);
             HasTestStatus = true;
             _log.LogWarning(ex, "Test connection failed for {Url}", url);
         }

@@ -2,6 +2,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Forms;
 using HomeAssistantDesktop.Models;
+using HomeAssistantDesktop.Resources;
 using Microsoft.Extensions.Logging;
 
 namespace HomeAssistantDesktop.Services;
@@ -11,6 +12,7 @@ public sealed class TrayService : IDisposable
     private readonly NotifyIcon _notify;
     private readonly SettingsService _settings;
     private readonly ILogger _log;
+    private readonly List<ToolStripItem> _menuItems = new();
 
     public event Action? OpenRequested;
     public event Action? SettingsRequested;
@@ -38,17 +40,27 @@ public sealed class TrayService : IDisposable
     private ContextMenuStrip BuildMenu()
     {
         var menu = new ContextMenuStrip();
-        menu.Items.Add("Open Home Assistant", null, (_, _) => OpenRequested?.Invoke());
-        menu.Items.Add(new ToolStripSeparator());
+        var openItem = menu.Items.Add(Strings.Tray_Open, null, (_, _) => OpenRequested?.Invoke());
+        _menuItems.Add(openItem);
+        var sep1 = new ToolStripSeparator();
+        menu.Items.Add(sep1);
+        _menuItems.Add(sep1);
 
-        var current = new ToolStripMenuItem("Current Server");
+        var current = new ToolStripMenuItem(Strings.Tray_CurrentServer);
         RebuildServerMenu(current);
         menu.Items.Add(current);
+        _menuItems.Add(current);
 
-        menu.Items.Add(new ToolStripSeparator());
-        menu.Items.Add("Settings", null, (_, _) => SettingsRequested?.Invoke());
-        menu.Items.Add(new ToolStripSeparator());
-        menu.Items.Add("Exit", null, (_, _) => ExitRequested?.Invoke());
+        var sep2 = new ToolStripSeparator();
+        menu.Items.Add(sep2);
+        _menuItems.Add(sep2);
+        var settingsItem = menu.Items.Add(Strings.Tray_Settings, null, (_, _) => SettingsRequested?.Invoke());
+        _menuItems.Add(settingsItem);
+        var sep3 = new ToolStripSeparator();
+        menu.Items.Add(sep3);
+        _menuItems.Add(sep3);
+        var exitItem = menu.Items.Add(Strings.Tray_Exit, null, (_, _) => ExitRequested?.Invoke());
+        _menuItems.Add(exitItem);
         _currentServerMenu = current;
         return menu;
     }
@@ -69,7 +81,7 @@ public sealed class TrayService : IDisposable
             target.DropDownItems.Add(item);
         }
         if (_settings.Settings.Servers.Count == 0)
-            target.DropDownItems.Add(new ToolStripMenuItem("(no servers)") { Enabled = false });
+            target.DropDownItems.Add(new ToolStripMenuItem(Strings.Tray_NoServers) { Enabled = false });
     }
 
     public void ShowBalloon(string title, string text)
@@ -81,6 +93,11 @@ public sealed class TrayService : IDisposable
     {
         _notify.Visible = false;
         _notify.Dispose();
+        foreach (var item in _menuItems)
+        {
+            item.Dispose();
+        }
+        _menuItems.Clear();
         _log.LogInformation("Tray disposed");
     }
 }

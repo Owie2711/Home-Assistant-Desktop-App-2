@@ -4,6 +4,7 @@ using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HomeAssistantDesktop.Models;
+using HomeAssistantDesktop.Resources;
 using HomeAssistantDesktop.Services;
 using Microsoft.Extensions.Logging;
 
@@ -28,6 +29,7 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _isFirstRun;
     [ObservableProperty] private string _setupUrl = "http://";
     [ObservableProperty] private bool _setupError;
+    [ObservableProperty] private string _webView2DownloadLink = "";
 
     public MainViewModel(WebViewService webView, WindowService window, SettingsService settings,
         ServerManager servers, TrayService tray, ILogger log)
@@ -65,7 +67,8 @@ public sealed partial class MainViewModel : ObservableObject
             _log.LogError(ex, "Failed to initialize main view");
             ErrorMode = true;
             ShowError = true;
-            ErrorText = "WebView2 could not be initialized.\n\nPlease install or update the Microsoft Edge WebView2 Runtime.";
+            ErrorText = Strings.Error_WebView2InitFailed;
+            WebView2DownloadLink = Strings.Error_WebView2DownloadLink;
         }
     }
 
@@ -75,10 +78,10 @@ public sealed partial class MainViewModel : ObservableObject
         {
             ConnectionText = state switch
             {
-                ConnectionState.Connected => "● Connected",
-                ConnectionState.Connecting => "● Connecting...",
-                ConnectionState.Offline => "● Offline",
-                _ => "● —"
+                ConnectionState.Connected => Strings.Status_Connected,
+                ConnectionState.Connecting => Strings.Status_Connecting,
+                ConnectionState.Offline => Strings.Status_Offline,
+                _ => Strings.Status_Unknown
             };
             ErrorMode = state == ConnectionState.Offline;
             if (state == ConnectionState.Connecting) IsLoading = true;
@@ -102,7 +105,7 @@ public sealed partial class MainViewModel : ObservableObject
             _log.LogError(ex, "Server switch failed");
             ErrorMode = true;
             ShowError = true;
-            ErrorText = "WebView2 could not be initialized for the selected server.";
+            ErrorText = Strings.Error_ServerSwitchFailed;
         }
     }
 
@@ -134,7 +137,7 @@ public sealed partial class MainViewModel : ObservableObject
         if (!Uri.TryCreate(SetupUrl.Trim(), UriKind.Absolute, out var uri) ||
             (uri.Scheme != "http" && uri.Scheme != "https"))
         {
-            ErrorText = "URL tidak valid. Gunakan format http://host:port";
+            ErrorText = Strings.Error_InvalidUrl;
             SetupError = true;
             ShowError = false;
             return;
@@ -142,7 +145,7 @@ public sealed partial class MainViewModel : ObservableObject
 
         SetupError = false;
         ShowError = false;
-        var profile = new ServerProfile { Name = "Home Assistant", Url = SetupUrl.Trim(), IsDefault = true };
+        var profile = new ServerProfile { Name = Strings.DefaultServer_Name, Url = SetupUrl.Trim(), IsDefault = true };
         _servers.AddOrUpdate(profile);
         _settings.Save();
         _tray.RebuildServerMenu();
@@ -161,7 +164,8 @@ public sealed partial class MainViewModel : ObservableObject
             _log.LogError(ex, "Failed to initialize after setup");
             ErrorMode = true;
             ShowError = true;
-            ErrorText = "WebView2 could not be initialized.\n\nPlease install or update the Microsoft Edge WebView2 Runtime.";
+            ErrorText = Strings.Error_WebView2InitFailed;
+            WebView2DownloadLink = Strings.Error_WebView2DownloadLink;
         }
     }
 }

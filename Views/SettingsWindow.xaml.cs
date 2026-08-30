@@ -1,15 +1,16 @@
 using System.Windows;
+using System.Windows.Input;
 using HomeAssistantDesktop.ViewModels;
 
 namespace HomeAssistantDesktop.Views;
 
 public partial class SettingsWindow : Window
 {
-    public SettingsWindow()
+    public SettingsWindow(SettingsViewModel vm)
     {
         InitializeComponent();
-        var vm = new SettingsViewModel(App.Settings, App.Servers, App.AutoStart, App.Window, App.Log);
         vm.CloseRequested += () => Close();
         DataContext = vm;
+        KeyDown += (_, e) => { if (e.Key == Key.Escape) Close(); };
     }
 }

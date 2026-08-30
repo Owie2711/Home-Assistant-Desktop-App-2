@@ -13,6 +13,7 @@ public sealed class SettingsService
     private readonly string _configDir;
     private readonly string _filePath;
     private readonly ILogger _log;
+    private System.Threading.Timer? _debounceTimer;
 
     public AppSettings Settings { get; private set; } = new();
 
@@ -54,22 +55,24 @@ public sealed class SettingsService
 
     public void Save()
     {
-        lock (_lock)
-        {
-            SaveLocked();
-        }
+        // Debounce: rapid successive saves write only the last state within a 500ms window
+        _debounceTimer?.Dispose();
+        _debounceTimer = new System.Threading.Timer(_ => SaveNow(), null, 500, Timeout.Infinite);
     }
 
-    private void SaveLocked()
+    private void SaveNow()
     {
-        try
+        lock (_lock)
         {
-            Directory.CreateDirectory(_configDir);
-            File.WriteAllText(_filePath, JsonSerializer.Serialize(Settings, JsonOptions));
-        }
-        catch (Exception ex)
-        {
-            _log.LogError(ex, "Failed to save settings");
+            try
+            {
+                Directory.CreateDirectory(_configDir);
+                File.WriteAllText(_filePath, JsonSerializer.Serialize(Settings, JsonOptions));
+            }
+            catch (Exception ex)
+            {
+                _log.LogError(ex, "Failed to save settings");
+            }
         }
     }
 }

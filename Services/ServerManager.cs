@@ -1,5 +1,6 @@
 using System.IO;
 using HomeAssistantDesktop.Models;
+using HomeAssistantDesktop.Resources;
 using Microsoft.Extensions.Logging;
 
 namespace HomeAssistantDesktop.Services;

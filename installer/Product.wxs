@@ -21,6 +21,12 @@
         <Component Id="MainExecutable" Guid="bea34346-bfdc-4aaa-b171-1cd30f55c92f">
           <File Source="D:\HOBIES\Github\HOME-ASSISTANT-APP\publish\HomeAssistantDesktop.exe" KeyPath="yes" />
           <File Source="D:\HOBIES\Github\HOME-ASSISTANT-APP\publish\Home Assistant.ico" />
+          <File Source="D:\HOBIES\Github\HOME-ASSISTANT-APP\publish\WebView2Loader.dll" />
+          <File Source="D:\HOBIES\Github\HOME-ASSISTANT-APP\publish\D3DCompiler_47_cor3.dll" />
+          <File Source="D:\HOBIES\Github\HOME-ASSISTANT-APP\publish\PenImc_cor3.dll" />
+          <File Source="D:\HOBIES\Github\HOME-ASSISTANT-APP\publish\PresentationNative_cor3.dll" />
+          <File Source="D:\HOBIES\Github\HOME-ASSISTANT-APP\publish\vcruntime140_cor3.dll" />
+          <File Source="D:\HOBIES\Github\HOME-ASSISTANT-APP\publish\wpfgfx_cor3.dll" />
         </Component>
 
         <Component Id="DesktopShortcutComp" Directory="DesktopFolder" Guid="d7c4e5f6-1234-5678-abcd-ef0123456789">

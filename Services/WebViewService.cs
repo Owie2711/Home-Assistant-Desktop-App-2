@@ -1,5 +1,6 @@
 using System.IO;
 using System.Net.Http;
+using HomeAssistantDesktop.Resources;
 using Microsoft.Extensions.Logging;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
@@ -14,7 +15,7 @@ public enum ConnectionState
     Offline
 }
 
-public sealed class WebViewService
+public sealed class WebViewService : IDisposable
 {
     private readonly SettingsService _settings;
     private readonly ServerManager _servers;
@@ -41,6 +42,7 @@ public sealed class WebViewService
 
     public async Task InitializeAsync()
     {
+        if (_disposed) return;
         if (_webView is null) return;
         var server = _servers.GetActive();
         if (server is null)
@@ -81,6 +83,7 @@ public sealed class WebViewService
 
     public async Task NavigateToServerAsync()
     {
+        if (_disposed) return;
         var server = _servers.GetActive();
         if (server is null || _webView?.CoreWebView2 is null) return;
         _log.LogInformation("Navigating to {Name} ({Url})", server.Name, server.Url);
@@ -88,10 +91,29 @@ public sealed class WebViewService
         await _webView.Dispatcher.InvokeAsync(() => _webView.CoreWebView2.Navigate(server.Url));
     }
 
-    public void NavigateBack() => _webView?.CoreWebView2?.GoBack();
-    public void NavigateForward() => _webView?.CoreWebView2?.GoForward();
-    public void Reload() => _webView?.CoreWebView2?.Reload();
-    public void Stop() => _webView?.CoreWebView2?.Stop();
+    public void NavigateBack()
+    {
+        if (_disposed) return;
+        _webView?.CoreWebView2?.GoBack();
+    }
+
+    public void NavigateForward()
+    {
+        if (_disposed) return;
+        _webView?.CoreWebView2?.GoForward();
+    }
+
+    public void Reload()
+    {
+        if (_disposed) return;
+        _webView?.CoreWebView2?.Reload();
+    }
+
+    public void Stop()
+    {
+        if (_disposed) return;
+        _webView?.CoreWebView2?.Stop();
+    }
 
     private void ApplyZoom()
     {
@@ -101,6 +123,7 @@ public sealed class WebViewService
 
     public void SetZoom(double factor)
     {
+        if (_disposed) return;
         if (_webView is not null)
         {
             _webView.ZoomFactor = factor;
@@ -120,6 +143,7 @@ public sealed class WebViewService
 
     public async Task SwitchServerAsync(string id)
     {
+        if (_disposed) return;
         _servers.SetActive(id);
         await RecreateEnvironmentForActiveAsync();
     }

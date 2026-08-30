@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppTitle" xml:space="preserve">
+    <value>Home Assistant Desktop</value>
+  </data>
+  <data name="Setup_Subtitle" xml:space="preserve">
+    <value>Enter your Home Assistant server address to get started.</value>
+  </data>
+  <data name="Setup_UrlPlaceholder" xml:space="preserve">
+    <value>Example: http://192.168.1.100:8123</value>
+  </data>
+  <data name="Setup_Connect" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="Error_InvalidUrl" xml:space="preserve">
+    <value>Invalid URL. Use format http://host:port</value>
+  </data>
+  <data name="Error_WebView2InitFailed" xml:space="preserve">
+    <value>WebView2 could not be initialized.
+
+Please install or update the Microsoft Edge WebView2 Runtime.</value>
+  </data>
+  <data name="Error_WebView2DownloadLink" xml:space="preserve">
+    <value>https://developer.microsoft.com/en-us/microsoft-edge/webview2/</value>
+  </data>
+  <data name="Error_OfflineTitle" xml:space="preserve">
+    <value>⚠ Home Assistant is unavailable</value>
+  </data>
+  <data name="Error_Retry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="Error_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Error_ServerSwitchFailed" xml:space="preserve">
+    <value>WebView2 could not be initialized for the selected server.</value>
+  </data>
+  <data name="Settings_Title" xml:space="preserve">
+    <value>Settings — Home Assistant Desktop</value>
+  </data>
+  <data name="Settings_StartupSection" xml:space="preserve">
+    <value>Startup</value>
+  </data>
+  <data name="Settings_StartWithWindows" xml:space="preserve">
+    <value>Start with Windows</value>
+  </data>
+  <data name="Settings_WindowSection" xml:space="preserve">
+    <value>Window</value>
+  </data>
+  <data name="Settings_AlwaysOnTop" xml:space="preserve">
+    <value>Always on top</value>
+  </data>
+  <data name="Settings_ServersSection" xml:space="preserve">
+    <value>Home Assistant Servers</value>
+  </data>
+  <data name="Settings_AddServer" xml:space="preserve">
+    <value>Add Server</value>
+  </data>
+  <data name="Settings_ServerDetails" xml:space="preserve">
+    <value>Server details</value>
+  </data>
+  <data name="Settings_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Settings_Url" xml:space="preserve">
+    <value>URL</value>
+  </data>
+  <data name="Settings_SetAsDefault" xml:space="preserve">
+    <value>Set as default</value>
+  </data>
+  <data name="Settings_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Settings_Test" xml:space="preserve">
+    <value>Test</value>
+  </data>
+  <data name="Settings_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Settings_Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Settings_Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="Settings_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Settings_AppearanceNote" xml:space="preserve">
+    <value>Appearance is managed by Home Assistant itself. The desktop client does not override Home Assistant themes.</value>
+  </data>
+  <data name="Settings_ConfirmDelete" xml:space="preserve">
+    <value>Delete server '{0}' ({1})?</value>
+  </data>
+  <data name="Settings_ConfirmDeleteTitle" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Test_UrlInvalid" xml:space="preserve">
+    <value>Invalid URL.</value>
+  </data>
+  <data name="Test_UrlInvalidFormat" xml:space="preserve">
+    <value>Invalid URL. Use format http://host:port or https://...</value>
+  </data>
+  <data name="Test_Testing" xml:space="preserve">
+    <value>Testing...</value>
+  </data>
+  <data name="Test_Ok" xml:space="preserve">
+    <value>OK — server reachable ({0}).</value>
+  </data>
+  <data name="Test_ReachableWithStatus" xml:space="preserve">
+    <value>Reachable but returned {0}.</value>
+  </data>
+  <data name="Test_Failed" xml:space="preserve">
+    <value>Failed: {0}</value>
+  </data>
+  <data name="Tray_Open" xml:space="preserve">
+    <value>Open Home Assistant</value>
+  </data>
+  <data name="Tray_CurrentServer" xml:space="preserve">
+    <value>Current Server</value>
+  </data>
+  <data name="Tray_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Tray_Exit" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="Tray_NoServers" xml:space="preserve">
+    <value>(no servers)</value>
+  </data>
+  <data name="Status_Connected" xml:space="preserve">
+    <value>● Connected</value>
+  </data>
+  <data name="Status_Connecting" xml:space="preserve">
+    <value>● Connecting...</value>
+  </data>
+  <data name="Status_Offline" xml:space="preserve">
+    <value>● Offline</value>
+  </data>
+  <data name="Status_Unknown" xml:space="preserve">
+    <value>● —</value>
+  </data>
+  <data name="NewServer_Name" xml:space="preserve">
+    <value>New Server</value>
+  </data>
+  <data name="NewServer_Url" xml:space="preserve">
+    <value>http://192.168.1.100:8123</value>
+  </data>
+  <data name="DefaultServer_Name" xml:space="preserve">
+    <value>Home Assistant</value>
+  </data>
+</root>
