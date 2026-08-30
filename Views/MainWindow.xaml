@@ -24,7 +24,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Compact native title bar -->
@@ -40,8 +39,6 @@
             <wv2:WebView2 x:Name="WebView"
                           MinWidth="0" MinHeight="0"
                           HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-            <TextBlock Text="{Binding ConnectionText}" HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                       Margin="8" Foreground="{DynamicResource SubtleText}" FontSize="11" Opacity="0.7"/>
 
             <ProgressBar IsIndeterminate="True" Height="3" VerticalAlignment="Top"
                          Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
@@ -63,11 +60,5 @@
                 </StackPanel>
             </Border>
         </Grid>
-
-        <StatusBar Grid.Row="2" Background="{DynamicResource ChromeBackground}" Height="22">
-            <StatusBarItem>
-                <TextBlock Text="{Binding ConnectionText}" Foreground="{DynamicResource SubtleText}" FontSize="11"/>
-            </StatusBarItem>
-        </StatusBar>
     </Grid>
 </Window>

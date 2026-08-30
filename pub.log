@@ -1,12 +1,12 @@
   Determining projects to restore...
   All projects are up-to-date for restore.
-D:\HOBIES\Github\HOME-ASSISTANT-APP\Views\MainWindow.xaml.cs(12,22): warning CS0649: Field 'MainWindow._isClosing' is never assigned to, and will always have its default value false [D:\HOBIES\Github\HOME-ASSISTANT-APP\HomeAssistantDesktop_yqydwoe1_wpftmp.csproj]
+D:\HOBIES\Github\HOME-ASSISTANT-APP\Views\MainWindow.xaml.cs(12,22): warning CS0649: Field 'MainWindow._isClosing' is never assigned to, and will always have its default value false [D:\HOBIES\Github\HOME-ASSISTANT-APP\HomeAssistantDesktop_fetnx0f2_wpftmp.csproj]
 D:\HOBIES\Github\HOME-ASSISTANT-APP\Views\MainWindow.xaml.cs(12,22): warning CS0649: Field 'MainWindow._isClosing' is never assigned to, and will always have its default value false [D:\HOBIES\Github\HOME-ASSISTANT-APP\HomeAssistantDesktop.csproj]
   HomeAssistantDesktop -> D:\HOBIES\Github\HOME-ASSISTANT-APP\bin\Release\net10.0-windows10.0.19041.0\win-x64\HomeAssistantDesktop.dll
 
 Build succeeded.
 
-D:\HOBIES\Github\HOME-ASSISTANT-APP\Views\MainWindow.xaml.cs(12,22): warning CS0649: Field 'MainWindow._isClosing' is never assigned to, and will always have its default value false [D:\HOBIES\Github\HOME-ASSISTANT-APP\HomeAssistantDesktop_yqydwoe1_wpftmp.csproj]
+D:\HOBIES\Github\HOME-ASSISTANT-APP\Views\MainWindow.xaml.cs(12,22): warning CS0649: Field 'MainWindow._isClosing' is never assigned to, and will always have its default value false [D:\HOBIES\Github\HOME-ASSISTANT-APP\HomeAssistantDesktop_fetnx0f2_wpftmp.csproj]
 D:\HOBIES\Github\HOME-ASSISTANT-APP\Views\MainWindow.xaml.cs(12,22): warning CS0649: Field 'MainWindow._isClosing' is never assigned to, and will always have its default value false [D:\HOBIES\Github\HOME-ASSISTANT-APP\HomeAssistantDesktop.csproj]
     2 Warning(s)
     0 Error(s)
