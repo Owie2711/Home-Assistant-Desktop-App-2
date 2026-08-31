@@ -125,6 +125,15 @@ public sealed class WindowService
     [DllImport("user32.dll")]
     private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
 
+    [DllImport("user32.dll")]
+    private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT
+    {
+        public int Left, Top, Right, Bottom;
+    }
+
     private static readonly IntPtr HWND_TOPMOST = new(-1);
     private const uint SWP_NOMOVE = 0x0002;
     private const uint SWP_NOSIZE = 0x0001;
@@ -151,18 +160,40 @@ public sealed class WindowService
     {
         if (_window is null) return;
         var s = _settings.Settings;
-        if (s.WindowLeft.HasValue && s.WindowTop.HasValue)
-        {
-            // ensure visible on an existing monitor
-            var rect = new Rect(s.WindowLeft.Value, s.WindowTop.Value, s.WindowWidth, s.WindowHeight);
-            if (IsOnScreen(rect))
-            {
-                _window.Left = s.WindowLeft.Value;
-                _window.Top = s.WindowTop.Value;
-            }
-        }
+
+        // Set WPF size first (this affects the Win32 window rect)
         _window.Width = s.WindowWidth;
         _window.Height = s.WindowHeight;
+
+        if (s.WindowLeft.HasValue && s.WindowTop.HasValue)
+        {
+            // Use Win32 SetWindowPos for exact pixel placement, bypassing WPF coordinate quirks
+            if (_hwnd == IntPtr.Zero)
+                _hwnd = new WindowInteropHelper(_window).Handle;
+
+            if (_hwnd != IntPtr.Zero)
+            {
+                // Validate the position is on screen
+                var testRect = new Rect(s.WindowLeft.Value, s.WindowTop.Value, s.WindowWidth, s.WindowHeight);
+                if (IsOnScreen(testRect))
+                {
+                    SetWindowPos(_hwnd, IntPtr.Zero,
+                        (int)s.WindowLeft.Value, (int)s.WindowTop.Value, 0, 0,
+                        SWP_NOSIZE | SWP_NOACTIVATE);
+                }
+            }
+            else
+            {
+                // Fallback to WPF if HWND not ready yet
+                var testRect = new Rect(s.WindowLeft.Value, s.WindowTop.Value, s.WindowWidth, s.WindowHeight);
+                if (IsOnScreen(testRect))
+                {
+                    _window.Left = s.WindowLeft.Value;
+                    _window.Top = s.WindowTop.Value;
+                }
+            }
+        }
+
         if (s.WindowMaximized) _window.WindowState = WindowState.Maximized;
         if (s.StartMinimized) _window.WindowState = WindowState.Minimized;
     }
@@ -172,6 +203,7 @@ public sealed class WindowService
         if (_window is null) return;
         var s = _settings.Settings;
         bool changed = false;
+
         if (_window.WindowState == WindowState.Maximized)
         {
             var rb = _window.RestoreBounds;
@@ -188,21 +220,46 @@ public sealed class WindowService
         }
         else
         {
-            if (s.WindowMaximized != false || s.WindowLeft != _window.Left || s.WindowTop != _window.Top ||
-                s.WindowWidth != _window.Width || s.WindowHeight != _window.Height)
+            // Use Win32 GetWindowRect to read the ACTUAL rendered position on screen
+            // This bypasses WPF's DPI coordinate system and gives us exact pixel values
+            double left, top, width, height;
+
+            if (_hwnd == IntPtr.Zero)
+                _hwnd = new WindowInteropHelper(_window).Handle;
+
+            if (_hwnd != IntPtr.Zero && GetWindowRect(_hwnd, out var rect))
+            {
+                left = rect.Left;
+                top = rect.Top;
+                width = rect.Right - rect.Left;
+                height = rect.Bottom - rect.Top;
+            }
+            else
+            {
+                // Fallback to WPF properties
+                left = _window.Left;
+                top = _window.Top;
+                width = _window.Width;
+                height = _window.Height;
+            }
+
+            if (s.WindowMaximized != false || s.WindowLeft != left || s.WindowTop != top ||
+                s.WindowWidth != width || s.WindowHeight != height)
             {
                 s.WindowMaximized = false;
-                s.WindowLeft = _window.Left;
-                s.WindowTop = _window.Top;
-                s.WindowWidth = _window.Width;
-                s.WindowHeight = _window.Height;
+                s.WindowLeft = left;
+                s.WindowTop = top;
+                s.WindowWidth = width;
+                s.WindowHeight = height;
                 changed = true;
             }
         }
+
         if (changed)
         {
             _settings.Save();
-            _log.LogInformation("Window state saved");
+            _log.LogInformation("Window state saved: Left={Left}, Top={Top}, Width={Width}, Height={Height}, Maximized={Max}",
+                s.WindowLeft, s.WindowTop, s.WindowWidth, s.WindowHeight, s.WindowMaximized);
         }
     }
 

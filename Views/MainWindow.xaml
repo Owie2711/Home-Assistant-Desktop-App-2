@@ -5,10 +5,12 @@
         xmlns:local="clr-namespace:HomeAssistantDesktop"
         Title="{x:Static res:Strings.AppTitle}"
         xmlns:res="clr-namespace:HomeAssistantDesktop.Resources"
+        WindowStartupLocation="Manual"
         MinWidth="100" MinHeight="80"
         ResizeMode="CanResize"
         Background="{DynamicResource WindowBackground}"
         Loaded="MainWindow_Loaded"
+        ContentRendered="MainWindow_ContentRendered"
         KeyDown="Window_KeyDown">
 
     <Window.Resources>

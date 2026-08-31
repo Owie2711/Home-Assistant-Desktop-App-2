@@ -60,6 +60,17 @@ public sealed class SettingsService
         _debounceTimer = new System.Threading.Timer(_ => SaveNow(), null, 500, Timeout.Infinite);
     }
 
+    /// <summary>
+    /// Writes settings to disk immediately, bypassing debounce.
+    /// Use this when the app is about to exit and the debounce timer won't have time to fire.
+    /// </summary>
+    public void SaveNowImmediate()
+    {
+        _debounceTimer?.Dispose();
+        _debounceTimer = null;
+        SaveNow();
+    }
+
     private void SaveNow()
     {
         lock (_lock)

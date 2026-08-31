@@ -24,7 +24,6 @@ public partial class MainWindow : Window
 
         App.WebView.Attach(WebView);
         App.Window.Attach(this);
-        App.Window.ApplySavedState();
 
         var iconPath = Path.Combine(AppContext.BaseDirectory, "Home Assistant.ico");
         if (!File.Exists(iconPath)) iconPath = Path.Combine(AppContext.BaseDirectory, "app.ico");
@@ -35,6 +34,7 @@ public partial class MainWindow : Window
         App.Tray.ExitRequested += () => System.Windows.Application.Current.Shutdown();
         _vm.SettingsRequested += ShowSettings;
         SizeChanged += MainWindow_SizeChanged;
+        LocationChanged += MainWindow_LocationChanged;
         StateChanged += MainWindow_StateChanged;
         IsVisibleChanged += MainWindow_IsVisibleChanged;
     }
@@ -62,6 +62,17 @@ public partial class MainWindow : Window
     private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         if (WindowState == WindowState.Minimized) return;
+        DebounceSave();
+    }
+
+    private void MainWindow_LocationChanged(object? sender, EventArgs e)
+    {
+        if (WindowState == WindowState.Minimized) return;
+        DebounceSave();
+    }
+
+    private void DebounceSave()
+    {
         if (_saveTimer == null)
         {
             _saveTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(800) };
@@ -75,6 +86,11 @@ public partial class MainWindow : Window
     {
         _saveTimer?.Stop();
         App.Window.SaveState();
+    }
+
+    private void MainWindow_ContentRendered(object? sender, EventArgs e)
+    {
+        App.Window.ApplySavedState();
     }
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -120,6 +136,7 @@ public partial class MainWindow : Window
     protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
     {
         App.Window.SaveState();
+        App.Settings.SaveNowImmediate();
         base.OnClosing(e);
     }
 
